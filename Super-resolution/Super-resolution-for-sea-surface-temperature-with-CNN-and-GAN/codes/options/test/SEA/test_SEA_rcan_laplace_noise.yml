@@ -1,0 +1,42 @@
+# 文件名建议: test_SEA_rcan_laplace_nino_noise.yml
+
+#### general settings
+# name 定义了结果保存的文件夹名，建议与训练任务关联
+name: test_SEA_rcan_laplace_noise
+# suffix 会添加到每个保存的图像文件名后，用于区分不同模型的测试结果
+suffix: _noise01
+model: sr
+distortion: sr
+scale: 4
+crop_border: ~ # 保持默认，在评测时会自动裁剪掉边缘（4个像素）
+gpu_ids: [0]
+
+#### datasets
+# 测试集就是您训练时用的验证集
+datasets:
+  test_1:
+    name: SEA_Val_Laplace # 与 val.name 保持一致
+    mode: LQGT
+    dataroot_GT: /hdd/SunZL/data/SuperResolutionData/SEA-LAPLACE/val_GT
+    dataroot_LQ: /hdd/SunZL/data/SuperResolutionData/SEA-LAPLACE/val_LQ
+    dataroot_mask: /hdd/SunZL/data/SuperResolutionData/SEA/SEA_ocean_mask.npy
+    # --- 以下参数必须与您的 val 配置完全一致 ---
+    nino_index_path: /hdd/SunZL/data/nino4.long.anom.csv
+    noise_level: 0.1
+
+#### network structures
+# 网络结构必须与您训练时使用的完全一致
+network_G:
+  which_model_G: RCAN
+  in_nc: 1
+  out_nc: 1
+  nf: 64
+  nb: 16
+  upscale: 4
+
+#### path
+path:
+  # ！！！！！！ 这是唯一也是最需要您手动修改的地方 ！！！！！！
+  # 请将其指向您训练好的、性能最佳的模型权重文件 (.pth)
+  # 通常保存在 ../experiments/您的训练任务名/models/ 文件夹下
+  pretrain_model_G: ../experiments/train_SEA_rcan_laplace_noise/models/24985_G.pth

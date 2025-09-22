@@ -1,0 +1,66 @@
+# 文件名: train_SEA_baseline.yml
+
+name: train_SEA_rrdbnet_laplace_noise  # 实验A的名称
+use_tb_logger: true
+model: sr 
+distortion: sr
+scale: 4
+gpu_ids: [0] # 请根据您的机器修改GPU编号
+
+datasets:
+  train:
+    name: SEA_Train
+    mode: LQGT
+    dataroot_GT: /hdd/SunZL/data/SuperResolutionData/SEA-LAPLACE/train_GT
+    dataroot_LQ: /hdd/SunZL/data/SuperResolutionData/SEA-LAPLACE/train_LQ
+    use_shuffle: true
+    n_workers: 8
+    batch_size: 8
+    GT_size: 256
+    LQ_size: 64
+    use_flip: true
+    use_rot: true
+    color: Gray
+    data_type: img
+    noise_level: 0.1
+
+
+  val:
+    name: SEA_Val
+    mode: LQGT
+    dataroot_GT: /hdd/SunZL/data/SuperResolutionData/SEA-LAPLACE/val_GT
+    dataroot_LQ: /hdd/SunZL/data/SuperResolutionData/SEA-LAPLACE/val_LQ
+    dataroot_mask: /hdd/SunZL/data/SuperResolutionData/SEA/SEA_ocean_mask.npy
+    noise_level: 0.1
+
+path:
+  pretrain_model_G: null
+  strict_load: true
+  resume_state: null
+
+network_G:
+  which_model_G: RRDBNet # 使用RRDBNet作为基线模型
+  in_nc: 1
+  out_nc: 1
+  nf: 64
+  nb: 23
+
+train:
+  lr_G: !!float 2e-4
+  beta1: 0.9
+  beta2: 0.999
+  warmup_iter: -1
+  lr_scheme: MultiStepLR
+  lr_steps: [50000, 100000, 200000, 300000]
+  lr_gamma: 0.5
+
+  pixel_criterion: 'l1' 
+  pixel_weight: 1.0
+
+  manual_seed: 10
+  niter: 500000
+  val_freq: 5000
+
+logger:
+  print_freq: 100
+  save_checkpoint_freq: !!float 5000
